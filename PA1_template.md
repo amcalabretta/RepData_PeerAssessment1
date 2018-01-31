@@ -1,10 +1,4 @@
----
-title: 'Reproducible Research: Peer Assessment 1'
-output:
-  html_document:
-    keep_md: yes
-  pdf_document: default
----
+# Reproducible Research: Peer Assessment 1
 
 
 
@@ -100,7 +94,7 @@ head(aggregatedSteps)
 Notice that, as stated in the assignment, we are not interested in the missing data (aka 'NA') for now.
 
 ###Make a histogram of the total number of steps taken each day
-We choose to create histogram byusing ggplot2 (see comments in the code):
+We choose to create histogram by using ggplot2 (see comments in the code):
 
 
 ```r
@@ -154,7 +148,7 @@ plot
 
 ###Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-Code below will select the row having the hogher amount of steps
+Code below will select the row having the higher amount of steps
 
 
 ```r
@@ -164,7 +158,89 @@ maxSteps <- aggregatedInterval[which.max(aggregatedInterval$steps), ]
 The interval containing the maximum amount of steps is __835__, the number of steps for this interval is __206__.
 
 ## Imputing missing values
+First of all, let's count the number of NAs:
 
 
+```r
+na_steps <- sum(is.na(aggregatedSteps$steps))
+na_date <- sum(is.na(dataframe$date))
+```
+
+Results are presented  below:
+
+na_steps:__8__
+na_date:__0__
+
+Having to deal with the NAs of the steps column (and only in this one), we choose the (simple) strategy to input the overall mean in the step column of the dataframe itself:
+
+
+```r
+aggregatedSteps[is.na(aggregatedSteps)] <- meanSteps
+```
+
+A quick look at the dataframe:
+
+
+```r
+head(aggregatedSteps)
+```
+
+```
+##         date steps
+## 1 2012-10-01 10766
+## 2 2012-10-02   126
+## 3 2012-10-03 11352
+## 4 2012-10-04 12116
+## 5 2012-10-05 13294
+## 6 2012-10-06 15420
+```
+
+This confirms that the dataframe does not contain any more NAs (at least forr)
+
+We can now proceed in re-creating the histogram (we can re-use the variables already defined):
+
+
+```r
+aggregatedSteps <- aggregate(dataframe$steps, by = list(dataframe$date), sum)
+colnames(aggregatedSteps) <- c("date", "steps")
+histogram <- ggplot(data = aggregatedSteps, mapping = aes(x = steps))
+histogram <- histogram + geom_histogram(aes(steps), fill = "red", colour = "white", 
+    alpha = 0.75)
+histogram
+```
+
+<img src="figure/histogram_new-1.png" style="display: block; margin: auto;" />
+
+Calculating the mean and median of the dataset (we expect them to don't change due to the strategy we implemented to fill the NAs):
+
+
+```r
+meanCleanSteps <- round(mean(aggregatedSteps$steps, na.rm = TRUE))
+medianCleanSteps <- round(median(aggregatedSteps$steps, na.rm = TRUE))
+```
+
+Values for the variables meanSteps and medianSteps are respectively __10766__ and __10765__.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Let's start by adding the 'week-day feature' on the original dataframe by using the suggested function:
+
+
+
+```r
+dataframe$weekday = weekdays(dataframe$date)
+```
+
+We can now easily proceed in adding the week-end one as requested: we choose to use a numeric feature and to map the value 1 to weekend and 0 otherwise:
+
+
+```r
+dataframe$weekend = ifelse(weekdays(dataframe$date) %in% c("Sunday", "Saturday"), 
+    1, 0)
+```
+
+
+
+
+
+
+
