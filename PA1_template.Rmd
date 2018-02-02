@@ -190,9 +190,30 @@ We can now easily proceed in adding the week-end one as requested: we choose to 
 dataframe$weekend=ifelse(weekdays(dataframe$date) %in% c("Sunday","Saturday"), 1,0)
 ```
 
+A quick glance at the dataframe:
 
+```{r check-add-feature-weekend}
+head(dataframe)
+```
 
+We can now proceed in making a new aggregation keeping into account the day of the week (Weekend vs Workday) and adjusting columns' names accordingly:
 
+```{r amc-add-weekend-dfs}
+aggregatedDataOverWeekEndVsWorkDay <- aggregate(dataframe$steps,  by=list(dataframe$interval,dataframe$weekend), mean, na.action=na.pass, na.rm=TRUE)
+colnames(aggregatedDataOverWeekEndVsWorkDay) <- c("interval", "weekend","steps")
+```
 
+Now we can create the graph with the two facets:
 
+```{r amc-create-facets}
+ggplot(
+  data=aggregatedDataOverWeekEndVsWorkDay,
+  mapping = aes(x = interval, y = steps)
+) +
+  geom_line(colour = "red",alpha = 0.3) +
+  facet_grid(weekend ~ .) +
+  ggtitle(list(title = "Activity Patterns in Weekdays and Weekends",
+    y = "Number of Steps", x = "Interval")) +
+  theme_bw()
+```
 

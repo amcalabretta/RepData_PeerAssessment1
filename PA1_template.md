@@ -238,9 +238,46 @@ dataframe$weekend = ifelse(weekdays(dataframe$date) %in% c("Sunday", "Saturday")
     1, 0)
 ```
 
+A quick glance at the dataframe:
 
 
+```r
+head(dataframe)
+```
+
+```
+##   steps       date interval weekday weekend
+## 1    NA 2012-10-01        0  Monday       0
+## 2    NA 2012-10-01        5  Monday       0
+## 3    NA 2012-10-01       10  Monday       0
+## 4    NA 2012-10-01       15  Monday       0
+## 5    NA 2012-10-01       20  Monday       0
+## 6    NA 2012-10-01       25  Monday       0
+```
+
+We can now create two dataframes (weekend and workdays) holding only the rows referring to week end or not:
 
 
+```r
+weekend <- dataframe[(dataframe$weekend == 1), ]
+workdays <- dataframe[(dataframe$weekend == 0), ]
+```
 
+
+```r
+aggregatedWeekend <- aggregate(weekend$steps, by = list(weekend$interval), mean, 
+    na.action = na.pass, na.rm = TRUE)
+colnames(aggregatedWeekend) <- c("interval", "steps")
+aggregatedWorkdays <- aggregate(workdays$steps, by = list(workdays$interval), mean, 
+    na.action = na.pass, na.rm = TRUE)
+colnames(aggregatedWorkdays) <- c("interval", "steps")
+```
+
+
+```r
+ggplot(data = aggregatedWeekend, mapping = aes(x = interval, y = steps)) + geom_line(colour = "red", 
+    alpha = 0.3) + theme_bw()
+```
+
+<img src="figure/plot-data-double-1.png" style="display: block; margin: auto;" />
 
