@@ -235,7 +235,7 @@ We can now easily proceed in adding the week-end one as requested: we choose to 
 
 ```r
 dataframe$weekend = ifelse(weekdays(dataframe$date) %in% c("Sunday", "Saturday"), 
-    1, 0)
+    "weekend", "weekday")
 ```
 
 A quick glance at the dataframe:
@@ -247,37 +247,35 @@ head(dataframe)
 
 ```
 ##   steps       date interval weekday weekend
-## 1    NA 2012-10-01        0  Monday       0
-## 2    NA 2012-10-01        5  Monday       0
-## 3    NA 2012-10-01       10  Monday       0
-## 4    NA 2012-10-01       15  Monday       0
-## 5    NA 2012-10-01       20  Monday       0
-## 6    NA 2012-10-01       25  Monday       0
+## 1    NA 2012-10-01        0  Monday weekday
+## 2    NA 2012-10-01        5  Monday weekday
+## 3    NA 2012-10-01       10  Monday weekday
+## 4    NA 2012-10-01       15  Monday weekday
+## 5    NA 2012-10-01       20  Monday weekday
+## 6    NA 2012-10-01       25  Monday weekday
 ```
 
-We can now create two dataframes (weekend and workdays) holding only the rows referring to week end or not:
+We can now proceed in making a new aggregation keeping into account the day of the week (Weekend vs Workday) and adjusting columns' names accordingly:
 
 
 ```r
-weekend <- dataframe[(dataframe$weekend == 1), ]
-workdays <- dataframe[(dataframe$weekend == 0), ]
+aggregatedDataOverWeekEndVsWorkDay <- aggregate(dataframe$steps, by = list(dataframe$interval, 
+    dataframe$weekend), mean, na.action = na.pass, na.rm = TRUE)
+colnames(aggregatedDataOverWeekEndVsWorkDay) <- c("interval", "weekend", "steps")
 ```
+
+Now we can create the graph with the two facets and a simple function to label them):
 
 
 ```r
-aggregatedWeekend <- aggregate(weekend$steps, by = list(weekend$interval), mean, 
-    na.action = na.pass, na.rm = TRUE)
-colnames(aggregatedWeekend) <- c("interval", "steps")
-aggregatedWorkdays <- aggregate(workdays$steps, by = list(workdays$interval), mean, 
-    na.action = na.pass, na.rm = TRUE)
-colnames(aggregatedWorkdays) <- c("interval", "steps")
+ggplot(data = aggregatedDataOverWeekEndVsWorkDay, mapping = aes(x = interval, y = steps)) + 
+    geom_line(colour = "red", alpha = 0.3) + facet_grid(weekend ~ .) + ggtitle(list(title = "Activity Patterns in Weekdays and Weekends", 
+    y = "Number of Steps", x = "Interval")) + theme_bw()
 ```
 
+<img src="figure/amc-create-facets-1.png" style="display: block; margin: auto;" />
 
-```r
-ggplot(data = aggregatedWeekend, mapping = aes(x = interval, y = steps)) + geom_line(colour = "red", 
-    alpha = 0.3) + theme_bw()
-```
+The pattern seems a bit more substained during the weekdays, with a slower start during the weekend.
 
-<img src="figure/plot-data-double-1.png" style="display: block; margin: auto;" />
+Maximum amount of steps is also higher in the weekdays all tho is more or less in the same interval as the one in the week end
 
