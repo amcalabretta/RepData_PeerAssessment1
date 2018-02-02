@@ -187,7 +187,7 @@ dataframe$weekday=weekdays(dataframe$date)
 We can now easily proceed in adding the week-end one as requested: we choose to use a numeric feature and to map the value 1 to weekend and 0 otherwise:
 
 ```{r add-feature-weekend}
-dataframe$weekend=ifelse(weekdays(dataframe$date) %in% c("Sunday","Saturday"), 1,0)
+dataframe$weekend=ifelse(weekdays(dataframe$date) %in% c("Sunday","Saturday"), 'weekend','weekday')
 ```
 
 A quick glance at the dataframe:
@@ -203,7 +203,7 @@ aggregatedDataOverWeekEndVsWorkDay <- aggregate(dataframe$steps,  by=list(datafr
 colnames(aggregatedDataOverWeekEndVsWorkDay) <- c("interval", "weekend","steps")
 ```
 
-Now we can create the graph with the two facets:
+Now we can create the graph with the two facets and a simple function to label them):
 
 ```{r amc-create-facets}
 ggplot(
@@ -216,4 +216,8 @@ ggplot(
     y = "Number of Steps", x = "Interval")) +
   theme_bw()
 ```
+
+The pattern seems a bit more substained during the weekdays, with a slower start during the weekend.
+
+Maximum amount of steps is also higher in the weekdays all tho is more or less in the same interval as the one in the week end
 
